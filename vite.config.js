@@ -4,6 +4,5 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // base: '/kurt-project/', // Set this to matches your GitHub repository name
-  base: './', // Use relative paths so it works on any repo name
+  base: '/kurt-project/', // Must match your GitHub repository name for GitHub Pages
 })
