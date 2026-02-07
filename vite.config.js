@@ -4,6 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // base: '/', // Use '/' for Vercel/Netlify, or '/kurt-project/dist/' for XAMPP
-  base: '/kurt-project/', // Set this to matches your GitHub repository name
+  // base: '/kurt-project/', // Set this to matches your GitHub repository name
+  base: './', // Use relative paths so it works on any repo name
 })
