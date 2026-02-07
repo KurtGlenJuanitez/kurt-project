@@ -606,6 +606,8 @@ export default function HomeContent() {
   const [isTyping, setIsTyping] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
   const [showTicket, setShowTicket] = useState(false);
+  const [isPopping, setIsPopping] = useState(false);
+  const [popMedia, setPopMedia] = useState([]);
   const containerRef = useRef(null);
 
   // Cycling media state - max 10 items visible at once (7 images + 3 videos)
@@ -786,6 +788,92 @@ export default function HomeContent() {
     return () => clearInterval(cycleInterval);
   }, [activeMedia.length, imagePositions.length, videoPositions.length]);
 
+  // Handle "Pop Pictures" button click
+  const handlePop = () => {
+    if (isPopping) return;
+    setIsPopping(true);
+
+    // Generate all images and videos at edge positions (avoid center where message is)
+    const edgePosition = () => {
+      // Pick left/right edges or top/bottom edges to avoid center
+      const side = Math.random();
+      let x, y;
+      if (side < 0.25) {
+        // Left edge
+        x = Math.random() * 15 + 2;
+        y = Math.random() * 85 + 5;
+      } else if (side < 0.5) {
+        // Right edge
+        x = Math.random() * 15 + 78;
+        y = Math.random() * 85 + 5;
+      } else if (side < 0.75) {
+        // Top edge
+        x = Math.random() * 80 + 10;
+        y = Math.random() * 15 + 2;
+      } else {
+        // Bottom edge
+        x = Math.random() * 80 + 10;
+        y = Math.random() * 15 + 78;
+      }
+      return { x: `${x}%`, y: `${y}%` };
+    };
+
+    const allPop = [];
+    for (let i = 1; i <= TOTAL_IMAGES; i++) {
+      const pos = edgePosition();
+      allPop.push({
+        id: `pop-img-${i}`,
+        type: 'image',
+        num: i,
+        x: pos.x,
+        y: pos.y,
+        rotate: Math.random() * 30 - 15,
+      });
+    }
+    for (let i = 1; i <= TOTAL_VIDEOS; i++) {
+      const pos = edgePosition();
+      allPop.push({
+        id: `pop-vid-${i}`,
+        type: 'video',
+        num: i,
+        x: pos.x,
+        y: pos.y,
+        rotate: Math.random() * 30 - 15,
+      });
+    }
+    setPopMedia(allPop);
+    setActiveMedia([]); // hide normal cycling
+
+    // After animation completes, clear pop and resume cycling
+    setTimeout(() => {
+      setPopMedia([]);
+      setIsPopping(false);
+      // Reset cycling media
+      mediaIndexRef.current = { image: 0, video: 0 };
+      mediaIdCounter.current = 0;
+      const initialMedia = [];
+      for (let i = 0; i < MAX_IMAGES; i++) {
+        initialMedia.push({
+          id: mediaIdCounter.current++,
+          type: 'image',
+          num: (mediaIndexRef.current.image % TOTAL_IMAGES) + 1,
+          positionIndex: i,
+        });
+        mediaIndexRef.current.image++;
+      }
+      for (let i = 0; i < MAX_VIDEOS; i++) {
+        initialMedia.push({
+          id: mediaIdCounter.current++,
+          type: 'video',
+          num: (mediaIndexRef.current.video % TOTAL_VIDEOS) + 1,
+          positionIndex: i,
+        });
+        mediaIndexRef.current.video++;
+      }
+      setActiveMedia(initialMedia);
+    }, 4000);
+  };
+
   // Handle "No" button click
   const handleNo = () => {
     setShowNotification(true);
@@ -806,6 +894,70 @@ export default function HomeContent() {
       ref={containerRef}
       className="relative min-h-screen flex items-center justify-center p-6 pt-12 overflow-hidden"
     >
+      {/* Pop Pictures Button - fixed on the side */}
+      <motion.button
+        className="fixed right-4 top-1/2 -translate-y-1/2 z-30 px-3 py-4 bg-gradient-to-b from-rose-gold to-amethyst rounded-xl text-white font-semibold shadow-lg"
+        style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(183, 110, 121, 0.5)' }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handlePop}
+        disabled={isPopping}
+      >
+        {isPopping ? 'Popping...' : 'Pop Pictures'}
+      </motion.button>
+
+      {/* Pop Media Burst - all at once (behind the letter card) */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <AnimatePresence>
+          {popMedia.map((item, i) => {
+            const basePath = import.meta.env.BASE_URL;
+            return (
+              <motion.div
+                key={item.id}
+                className="absolute"
+                style={{
+                  left: item.x,
+                  top: item.y,
+                }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: [0, 1, 1, 0],
+                  scale: [0, 1.2, 1, 0.6],
+                  rotate: [0, item.rotate],
+                }}
+                exit={{ opacity: 0, scale: 0 }}
+                transition={{
+                  duration: 3.5,
+                  delay: i * 0.03,
+                  ease: "easeOut",
+                }}
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose-gold/30 to-amethyst/30 rounded-2xl blur-lg" />
+                  {item.type === 'image' ? (
+                    <img
+                      src={`${basePath}memories/image-${item.num}.jpg`}
+                      alt={`Memory ${item.num}`}
+                      className="w-28 h-28 md:w-36 md:h-36 object-cover rounded-2xl border-2 border-rose-gold/40 shadow-2xl"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <video
+                      src={`${basePath}memories/vid-${item.num}.mp4`}
+                      className="w-28 h-28 md:w-36 md:h-36 object-cover rounded-2xl border-2 border-rose-gold/40 shadow-2xl"
+                      autoPlay loop muted playsInline
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+
       {/* Floating Images/Videos Background - max 10 items cycling */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <AnimatePresence mode="popLayout">
