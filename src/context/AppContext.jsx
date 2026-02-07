@@ -43,13 +43,13 @@ export function AppProvider({ children }) {
   }, []);
 
   const handleDockClick = useCallback((dockIndex) => {
-    // Docks 1 (Memories) and 2 (Messages) require unlock
-    if ((dockIndex === 1 || dockIndex === 2) && !isAnniversaryUnlocked) {
-      setShowPasscodeOverlay(true);
+    // Docks 1 (Memories) and 2 (Messages) are permanently locked
+    if (dockIndex === 1 || dockIndex === 2) {
+      showNotification('This section is locked.');
       return;
     }
     setActiveDock(dockIndex);
-  }, [isAnniversaryUnlocked]);
+  }, [showNotification]);
 
   const toggleMusic = useCallback(() => {
     setIsMusicPlaying(prev => !prev);
