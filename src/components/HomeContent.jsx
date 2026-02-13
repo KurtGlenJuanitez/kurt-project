@@ -207,10 +207,10 @@ function ValentineTicket({ onClose }) {
       ctx.lineTo(210 * scale, 310 * scale);
       ctx.stroke();
 
-      // Date - 2025
+      // Date - 2026
       ctx.fillStyle = '#ffffff';
       ctx.font = `300 ${28 * scale}px Georgia, serif`;
-      ctx.fillText('2025', 255 * scale, dateY);
+      ctx.fillText('2026', 255 * scale, dateY);
       ctx.fillStyle = 'rgba(183, 110, 121, 0.5)';
       ctx.font = `${8 * scale}px Arial, sans-serif`;
       ctx.fillText('YEAR', 255 * scale, labelY);
@@ -256,7 +256,7 @@ function ValentineTicket({ onClose }) {
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = 'valentine-ticket-2025.png';
+      link.download = 'valentine-ticket-2026.png';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -415,7 +415,7 @@ function ValentineTicket({ onClose }) {
                   </div>
                   <div className="w-px h-10 bg-rose-gold/20" />
                   <div className="text-center">
-                    <span className="block text-3xl font-light text-white">2025</span>
+                    <span className="block text-3xl font-light text-white">2026</span>
                     <span className="text-[10px] text-rose-gold/50 uppercase tracking-wider">Year</span>
                   </div>
                 </div>
