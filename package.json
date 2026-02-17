@@ -9,6 +9,7 @@
     "build": "vite build",
     "generate:memories-manifest": "node scripts/generate-memories-manifest.mjs",
     "optimize:memories": "node scripts/optimize-memories-media.mjs",
+    "optimize:memories:fallback-images": "node scripts/optimize-memories-image-fallback.mjs",
     "optimize:memories:refresh": "npm run optimize:memories && npm run generate:memories-manifest",
     "lint": "eslint .",
     "preview": "vite preview"
