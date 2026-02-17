@@ -1,10 +1,16 @@
 import { useRef, useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 
+const NORMAL_VOLUME = 1;
+const DUCKED_VOLUME = 0.15;
+const FADE_STEP = 0.05;
+const FADE_INTERVAL_MS = 30;
+
 const AudioPlayer = () => {
-  const { isMusicPlaying, hasAcceptedDate } = useApp();
+  const { isMusicPlaying, hasAcceptedDate, isVideoPlaying } = useApp();
   const audioRef = useRef(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const fadeRef = useRef(null);
 
   useEffect(() => {
     // Only attempt to play after user has clicked "Yes" (user interaction)
@@ -24,6 +30,31 @@ const AudioPlayer = () => {
       audioRef.current.pause();
     }
   }, [isMusicPlaying, hasAcceptedDate]);
+
+  // Smoothly fade volume when a video plays/pauses
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const target = isVideoPlaying ? DUCKED_VOLUME : NORMAL_VOLUME;
+
+    if (fadeRef.current) clearInterval(fadeRef.current);
+
+    fadeRef.current = setInterval(() => {
+      const diff = target - audio.volume;
+      if (Math.abs(diff) < FADE_STEP) {
+        audio.volume = target;
+        clearInterval(fadeRef.current);
+        fadeRef.current = null;
+      } else {
+        audio.volume += diff > 0 ? FADE_STEP : -FADE_STEP;
+      }
+    }, FADE_INTERVAL_MS);
+
+    return () => {
+      if (fadeRef.current) clearInterval(fadeRef.current);
+    };
+  }, [isVideoPlaying]);
 
   // Reset when experience is reset
   useEffect(() => {

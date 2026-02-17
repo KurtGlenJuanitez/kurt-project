@@ -7,7 +7,7 @@ export function AppProvider({ children }) {
   const [hasAcceptedDate, setHasAcceptedDate] = useState(false);
 
   // Controls access to locked docks (Memories and Messages)
-  const [isAnniversaryUnlocked, setIsAnniversaryUnlocked] = useState(false);
+  const [isAnniversaryUnlocked, setIsAnniversaryUnlocked] = useState(true);
 
   // Current active dock (0: Home, 1: Memories, 2: Messages, 3: Settings)
   const [activeDock, setActiveDock] = useState(0);
@@ -20,6 +20,9 @@ export function AppProvider({ children }) {
 
   // Music state
   const [isMusicPlaying, setIsMusicPlaying] = useState(true);
+
+  // Video playing state — used to duck background music volume
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   // The anniversary passcode: 02-18-2025
   const ANNIVERSARY_PASSCODE = '02-18-2025';
@@ -43,13 +46,8 @@ export function AppProvider({ children }) {
   }, []);
 
   const handleDockClick = useCallback((dockIndex) => {
-    // Docks 1 (Memories) and 2 (Messages) are permanently locked
-    if (dockIndex === 1 || dockIndex === 2) {
-      showNotification('This section is locked.');
-      return;
-    }
     setActiveDock(dockIndex);
-  }, [showNotification]);
+  }, []);
 
   const toggleMusic = useCallback(() => {
     setIsMusicPlaying(prev => !prev);
@@ -57,11 +55,16 @@ export function AppProvider({ children }) {
 
   const resetExperience = useCallback(() => {
     setHasAcceptedDate(false);
-    setIsAnniversaryUnlocked(false);
+    setIsAnniversaryUnlocked(true);
     setActiveDock(0);
     setShowPasscodeOverlay(false);
     setNotification(null);
     setIsMusicPlaying(false);
+    // Re-lock Memories and Messages modules
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('memories-module-unlocked');
+      window.sessionStorage.removeItem('messages-module-unlocked');
+    }
   }, []);
 
   const value = {
@@ -72,6 +75,7 @@ export function AppProvider({ children }) {
     showPasscodeOverlay,
     notification,
     isMusicPlaying,
+    isVideoPlaying,
 
     // Actions
     acceptDate,
@@ -80,6 +84,7 @@ export function AppProvider({ children }) {
     handleDockClick,
     setShowPasscodeOverlay,
     toggleMusic,
+    setIsVideoPlaying,
     resetExperience,
     setActiveDock,
   };

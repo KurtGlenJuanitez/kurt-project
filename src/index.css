@@ -107,3 +107,78 @@ body {
 .pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* ─── Messages Module: Envelope & Letter Animations ─── */
+
+/* Gentle shake for wrong passcode input */
+@keyframes messages-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(5px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(3px); }
+  75% { transform: translateX(-2px); }
+}
+
+.messages-shake {
+  animation: messages-shake 0.5s ease-in-out;
+}
+
+/* Soft pulsing glow on the envelope to invite interaction */
+@keyframes envelope-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(183, 110, 121, 0.2),
+      0 0 40px rgba(183, 110, 121, 0.08);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow:
+      0 0 35px rgba(183, 110, 121, 0.35),
+      0 0 70px rgba(183, 110, 121, 0.15);
+    filter: brightness(1.05);
+  }
+}
+
+.envelope-pulse {
+  animation: envelope-pulse 3s ease-in-out infinite;
+}
+
+/* Paper texture background for the letter */
+.letter-paper {
+  background:
+    linear-gradient(
+      180deg,
+      #faf6f0 0%,
+      #f5efe6 30%,
+      #faf8f4 60%,
+      #f2ece3 100%
+    );
+  position: relative;
+}
+
+.letter-paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(183, 110, 121, 0.06) 28px,
+      rgba(183, 110, 121, 0.06) 29px
+    );
+  pointer-events: none;
+}
+
+/* Fade-in for the letter text content */
+@keyframes letter-text-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.letter-text-reveal {
+  animation: letter-text-fade 1.2s ease-out forwards;
+  opacity: 0;
+}

@@ -1,0 +1,235 @@
+.menu-wrap {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 1rem;
+  --flow-scrollbar-size: 14px;
+  --flow-scrollbar-radius: 999px;
+  --flow-scrollbar-gap: 2px;
+  --flow-scrollbar-track: rgba(20, 20, 24, 0.46);
+  --flow-scrollbar-thumb: rgba(183, 110, 121, 0.62);
+  --flow-scrollbar-thumb-hover: rgba(212, 165, 172, 0.9);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  scrollbar-width: auto;
+  scrollbar-color: var(--flow-scrollbar-thumb) var(--flow-scrollbar-track);
+  scrollbar-gutter: stable;
+}
+
+.menu__item {
+  flex: 0 0 auto;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  border-top: 1px solid;
+  min-height: 4.2rem;
+  contain: layout style;
+  transition: background-color 0.3s ease;
+}
+
+.menu__item:first-child {
+  border-top: none;
+}
+
+/* Subtle hover tint before the marquee fully covers */
+.menu__item:hover {
+  background-color: rgba(183, 110, 121, 0.06);
+}
+
+.menu::-webkit-scrollbar {
+  width: var(--flow-scrollbar-size);
+}
+
+.menu::-webkit-scrollbar-track {
+  background: var(--flow-scrollbar-track);
+  border-radius: var(--flow-scrollbar-radius);
+}
+
+.menu::-webkit-scrollbar-thumb {
+  background: var(--flow-scrollbar-thumb);
+  border-radius: var(--flow-scrollbar-radius);
+  border: var(--flow-scrollbar-gap) solid transparent;
+  background-clip: padding-box;
+}
+
+.menu::-webkit-scrollbar-thumb:hover {
+  background: var(--flow-scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+.menu__item--active {
+  background: rgba(183, 110, 121, 0.12);
+}
+
+.menu__item-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+  letter-spacing: 0.1em;
+  transition: color 0.25s ease, letter-spacing 0.4s ease;
+  padding: 0 1.5rem;
+}
+
+/* Expand tracking slightly on hover for elegance */
+.menu__item:hover .menu__item-link {
+  letter-spacing: 0.16em;
+}
+
+.menu__item-link--active {
+  color: var(--color-rose-gold-light);
+  text-shadow: 0 0 14px rgba(183, 110, 121, 0.45);
+}
+
+.menu__item-link:hover {
+  color: inherit;
+}
+
+.menu__item-link:focus-visible {
+  outline: 2px solid rgba(220, 20, 60, 0.55);
+  outline-offset: -2px;
+}
+
+/* Faint index number positioned to the left of each row */
+.menu__item-index {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: rgba(183, 110, 121, 0.22);
+  pointer-events: none;
+  transition: color 0.3s ease;
+  font-variant-numeric: tabular-nums;
+}
+
+.menu__item:hover .menu__item-index {
+  color: rgba(183, 110, 121, 0.35);
+}
+
+/* Small thumbnail circle on the right side of each row */
+.menu__item-thumb {
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(183, 110, 121, 0.2);
+  opacity: 0.4;
+  transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.3s ease;
+  pointer-events: none;
+}
+
+.menu__item:hover .menu__item-thumb {
+  opacity: 0.7;
+  transform: translateY(-50%) scale(1.15);
+  border-color: rgba(183, 110, 121, 0.4);
+}
+
+.menu__item--active .menu__item-thumb {
+  opacity: 0.6;
+  border-color: rgba(183, 110, 121, 0.35);
+}
+
+/* Marquee overlay */
+.marquee {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.marquee--visible {
+  opacity: 1;
+}
+
+.marquee__inner-wrap {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.marquee__inner {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  will-change: transform;
+}
+
+.marquee__track {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  animation-name: flow-marquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+.marquee__track--running {
+  animation-play-state: running;
+}
+
+.marquee__part {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.marquee span {
+  white-space: nowrap;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: clamp(0.78rem, 1.5vw, 1rem);
+  line-height: 1;
+  letter-spacing: 0.08em;
+  padding: 0 0.55rem;
+}
+
+.marquee__img {
+  width: clamp(74px, 12vw, 120px);
+  height: clamp(30px, 4.2vh, 40px);
+  margin: 0.7rem 0.65rem;
+  border-radius: 999px;
+  background-size: cover;
+  background-position: 50% 50%;
+  border: 1px solid rgba(183, 110, 121, 0.3);
+}
+
+@keyframes flow-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-1 * var(--flow-width, 0px)), 0, 0);
+  }
+}
