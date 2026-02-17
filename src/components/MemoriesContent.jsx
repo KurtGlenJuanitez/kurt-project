@@ -11,9 +11,13 @@ const MEMORIES_UNLOCK_STORAGE_KEY = 'memories-module-unlocked';
 const MEMORIES_LOCK_CODE = '101224';
 const MONTH_MEDIA_ROOT = 'memories/months';
 const IMAGE_EXTENSIONS = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG', 'webp', 'WEBP'];
-const VIDEO_EXTENSIONS = ['mp4', 'MP4', 'webm', 'WEBM', 'mov', 'MOV'];
-const IMAGE_SLOTS = Array.from({ length: 20 }, (_, idx) => idx + 1);
-const VIDEO_SLOTS = Array.from({ length: 10 }, (_, idx) => idx + 1);
+const VIDEO_EXTENSIONS = [
+  'mp4', 'MP4', 'webm', 'WEBM', 'mov', 'MOV',
+  // Handles files like "vid-3.MP4.mp4" that exist in the media folders.
+  'mp4.mp4', 'MP4.mp4', 'mov.mp4', 'MOV.mp4',
+];
+const IMAGE_SLOTS = Array.from({ length: 24 }, (_, idx) => idx + 1);
+const VIDEO_SLOTS = Array.from({ length: 12 }, (_, idx) => idx + 1);
 const assetCache = new Map();
 const MONTH_FMT = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
