@@ -127,7 +127,7 @@ const CardSwap = forwardRef(({
     order.current = [...rest, front];
     layoutCards(true);
     settleAnimation();
-    onCardChange?.();
+    onCardChange?.(order.current[0]);
   }, [layoutCards, settleAnimation, pauseAllVideos, onCardChange]);
 
   const prev = useCallback(() => {
@@ -139,7 +139,7 @@ const CardSwap = forwardRef(({
     order.current = [last, ...rest];
     layoutCards(true);
     settleAnimation();
-    onCardChange?.();
+    onCardChange?.(order.current[0]);
   }, [layoutCards, settleAnimation, pauseAllVideos, onCardChange]);
 
   useImperativeHandle(ref, () => ({
@@ -151,6 +151,7 @@ const CardSwap = forwardRef(({
   useEffect(() => {
     order.current = Array.from({ length: childCount }, (_, i) => i);
     layoutCards(false);
+    onCardChange?.(order.current[0] ?? 0);
 
     return () => {
       if (settleTimerRef.current) {
@@ -158,7 +159,7 @@ const CardSwap = forwardRef(({
       }
       isAnimatingRef.current = false;
     };
-  }, [childCount, layoutCards, skewAmount, easing]);
+  }, [childCount, layoutCards, skewAmount, easing, onCardChange]);
 
   const rendered = childArr.map((child, i) => (
     isValidElement(child)

@@ -130,9 +130,35 @@ function buildMonthCards(monthId, basePath) {
   return [...imageCards, ...videoCards];
 }
 
-function MemoryCardMedia({ card }) {
+function getNearbyIndices(centerIndex, total, radius = 2) {
+  if (total <= 0) return [];
+
+  const values = [];
+  for (let offset = -radius; offset <= radius; offset += 1) {
+    const normalized = (centerIndex + offset + total) % total;
+    if (!values.includes(normalized)) {
+      values.push(normalized);
+    }
+  }
+
+  return values;
+}
+
+function MemoryCardMedia({ card, shouldLoad, isActive }) {
   const [hasError, setHasError] = useState(false);
   const { setIsVideoPlaying } = useApp();
+
+  if (!shouldLoad) {
+    return (
+      <div className="h-full w-full bg-gradient-to-br from-charcoal-lighter to-charcoal flex items-center justify-center">
+        <div className="text-center px-5">
+          <p className="text-xs uppercase tracking-[0.2em] text-amethyst-light/70">{card.type}</p>
+          <p className="mt-2 text-lg text-rose-gold-light/90 font-medium">{card.label}</p>
+          <p className="mt-2 text-sm text-amethyst-light/55">Media will load when this card comes near the front.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (hasError) {
     return (
@@ -155,7 +181,7 @@ function MemoryCardMedia({ card }) {
         controls
         autoPlay={false}
         playsInline
-        preload="none"
+        preload={isActive ? 'metadata' : 'none'}
         onPlay={() => setIsVideoPlaying(true)}
         onPause={() => setIsVideoPlaying(false)}
         onEnded={() => setIsVideoPlaying(false)}
@@ -169,7 +195,8 @@ function MemoryCardMedia({ card }) {
       src={card.src}
       alt={card.label}
       className="w-full h-full object-cover"
-      loading="lazy"
+      loading={isActive ? 'eager' : 'lazy'}
+      fetchPriority={isActive ? 'high' : 'low'}
       decoding="async"
       onError={() => setHasError(true)}
     />
@@ -192,6 +219,8 @@ export default function MemoriesContent() {
   const [monthCards, setMonthCards] = useState([]);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
   const [mediaFilter, setMediaFilter] = useState('all');
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [loadedCardIndices, setLoadedCardIndices] = useState(() => new Set([0]));
   const cardSwapRef = useRef(null);
   const flowMenuScrollbar = useMemo(() => getFlowMenuScrollbarConfig(), []);
 
@@ -249,6 +278,18 @@ export default function MemoriesContent() {
   }, [monthCards, mediaFilter]);
 
   useEffect(() => {
+    if (filteredCards.length === 0) {
+      setActiveCardIndex(0);
+      setLoadedCardIndices(new Set());
+      return;
+    }
+
+    const initialIndices = getNearbyIndices(0, filteredCards.length, 2);
+    setActiveCardIndex(0);
+    setLoadedCardIndices(new Set(initialIndices));
+  }, [filteredCards.length, activeMonthId, mediaFilter]);
+
+  useEffect(() => {
     if (!isUnlocked || viewMode !== 'detail' || filteredCards.length < 2) return undefined;
 
     const onKeyDown = (event) => {
@@ -279,9 +320,20 @@ export default function MemoriesContent() {
 
   const { setIsVideoPlaying } = useApp();
 
-  const handleCardChange = useCallback(() => {
+  const handleCardChange = useCallback((frontIndex = 0) => {
     setIsVideoPlaying(false);
-  }, [setIsVideoPlaying]);
+    if (filteredCards.length === 0) return;
+
+    const normalizedFront = (frontIndex + filteredCards.length) % filteredCards.length;
+    setActiveCardIndex(normalizedFront);
+    setLoadedCardIndices((previous) => {
+      const next = new Set(previous);
+      for (const index of getNearbyIndices(normalizedFront, filteredCards.length, 2)) {
+        next.add(index);
+      }
+      return next;
+    });
+  }, [setIsVideoPlaying, filteredCards.length]);
 
   const handleBackToMenu = useCallback(() => {
     setIsVideoPlaying(false);
@@ -507,9 +559,13 @@ export default function MemoriesContent() {
                       skewAmount={5}
                       easing="elastic"
                     >
-                      {filteredCards.map((card) => (
+                      {filteredCards.map((card, index) => (
                         <Card key={card.id} className="overflow-hidden cursor-pointer">
-                          <MemoryCardMedia card={card} />
+                          <MemoryCardMedia
+                            card={card}
+                            shouldLoad={loadedCardIndices.has(index)}
+                            isActive={index === activeCardIndex}
+                          />
                         </Card>
                       ))}
                     </CardSwap>
