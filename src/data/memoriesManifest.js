@@ -114,13 +114,9 @@ export const MONTH_MEDIA_MANIFEST = {
       "image-8.JPG"
     ],
     "videos": [
-      "vid-1.mov",
+      "vid-1.mp4",
       "vid-2.MP4",
-      "vid-3.MP4",
-      "vid-4.MP4",
       "vid-5.MP4",
-      "vid-6.MP4",
-      "vid-7.MP4",
       "vid-8.MP4",
       "vid-9.MP4",
       "vid-10.MP4",
@@ -161,7 +157,6 @@ export const MONTH_MEDIA_MANIFEST = {
       "vid-1.MP4",
       "vid-2.MP4",
       "vid-3.MP4",
-      "vid-4.MP4",
       "vid-5.mp4"
     ]
   },
@@ -216,13 +211,13 @@ export const MONTH_MEDIA_MANIFEST = {
       "image-11.JPG"
     ],
     "videos": [
-      "vid-1.MOV",
-      "vid-2.MOV",
-      "vid-3.MOV",
-      "vid-4.MOV",
-      "vid-5.MOV",
-      "vid-6.MOV",
-      "vid-7.MOV"
+      "vid-1.mp4",
+      "vid-2.mp4",
+      "vid-3.mp4",
+      "vid-4.mp4",
+      "vid-5.mp4",
+      "vid-6.mp4",
+      "vid-7.mp4"
     ]
   },
   "2025-10": {
@@ -250,11 +245,10 @@ export const MONTH_MEDIA_MANIFEST = {
     ],
     "videos": [
       "vid-1.mp4",
-      "vid-2.MP4",
       "vid-3.mp4",
-      "vid-4.MOV",
-      "vid-6.MOV",
-      "vid-7.MOV",
+      "vid-4.mp4",
+      "vid-6.mp4",
+      "vid-7.mp4",
       "vid-8.MOV",
       "vid-9.MOV"
     ]
@@ -270,9 +264,9 @@ export const MONTH_MEDIA_MANIFEST = {
       "image-7.png"
     ],
     "videos": [
-      "vid-1.MOV",
-      "vid-2.MOV",
-      "vid-3.MOV"
+      "vid-1.mp4",
+      "vid-2.mp4",
+      "vid-3.mp4"
     ]
   },
   "2025-12": {
@@ -320,7 +314,7 @@ export const MONTH_MEDIA_MANIFEST = {
       "image-8.png"
     ],
     "videos": [
-      "vid-1.mov"
+      "vid-1.mp4"
     ]
   }
 };
