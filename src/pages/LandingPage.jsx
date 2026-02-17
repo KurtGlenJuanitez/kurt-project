@@ -27,7 +27,7 @@ function FloatingHeart({ delay, x, size }) {
 }
 
 export default function LandingPage() {
-  const { acceptDate, showNotification, setActiveDock } = useApp();
+  const { acceptDate, showNotification, setActiveDock, registerMusicInteraction } = useApp();
   const [entryView, setEntryView] = useState('menu');
   const [noButtonPosition, setNoButtonPosition] = useState({ x: 0, y: 0 });
   const [showAcceptedMessage, setShowAcceptedMessage] = useState(false);
@@ -73,14 +73,16 @@ export default function LandingPage() {
   }, []);
 
   const handleNoClick = useCallback(() => {
+    registerMusicInteraction();
     moveNoButton();
-  }, [moveNoButton]);
+  }, [moveNoButton, registerMusicInteraction]);
 
   const handleEnterValentine = useCallback(() => {
+    registerMusicInteraction();
     clearAcceptTimer();
     resetValentineFlow();
     setEntryView('valentine');
-  }, [clearAcceptTimer, resetValentineFlow]);
+  }, [clearAcceptTimer, registerMusicInteraction, resetValentineFlow]);
 
   const handleBackToMenu = useCallback(() => {
     clearAcceptTimer();
@@ -89,12 +91,14 @@ export default function LandingPage() {
   }, [clearAcceptTimer, resetValentineFlow]);
 
   const handleHomeEntry = useCallback(() => {
+    registerMusicInteraction();
     clearAcceptTimer();
     setActiveDock(1);
     acceptDate();
-  }, [acceptDate, clearAcceptTimer, setActiveDock]);
+  }, [acceptDate, clearAcceptTimer, registerMusicInteraction, setActiveDock]);
 
   const handleYesClick = useCallback(() => {
+    registerMusicInteraction();
     clearAcceptTimer();
     setShowAcceptedMessage(true);
     showNotification("Well you can't really say no so... You're stuck with me now.", 4000);
@@ -103,7 +107,7 @@ export default function LandingPage() {
       setActiveDock(0);
       acceptDate();
     }, 4500);
-  }, [acceptDate, clearAcceptTimer, setActiveDock, showNotification]);
+  }, [acceptDate, clearAcceptTimer, registerMusicInteraction, setActiveDock, showNotification]);
 
   const hearts = useMemo(
     () =>

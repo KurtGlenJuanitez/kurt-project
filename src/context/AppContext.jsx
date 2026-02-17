@@ -20,6 +20,7 @@ export function AppProvider({ children }) {
 
   // Music state
   const [isMusicPlaying, setIsMusicPlaying] = useState(true);
+  const [hasMusicInteraction, setHasMusicInteraction] = useState(false);
 
   // Video playing state — used to duck background music volume
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -53,6 +54,11 @@ export function AppProvider({ children }) {
     setIsMusicPlaying(prev => !prev);
   }, []);
 
+  const registerMusicInteraction = useCallback(() => {
+    setHasMusicInteraction(true);
+    setIsMusicPlaying(true);
+  }, []);
+
   const resetExperience = useCallback(() => {
     setHasAcceptedDate(false);
     setIsAnniversaryUnlocked(true);
@@ -60,6 +66,7 @@ export function AppProvider({ children }) {
     setShowPasscodeOverlay(false);
     setNotification(null);
     setIsMusicPlaying(false);
+    setHasMusicInteraction(false);
     // Re-lock Memories and Messages modules
     if (typeof window !== 'undefined') {
       window.sessionStorage.removeItem('memories-module-unlocked');
@@ -75,6 +82,7 @@ export function AppProvider({ children }) {
     showPasscodeOverlay,
     notification,
     isMusicPlaying,
+    hasMusicInteraction,
     isVideoPlaying,
 
     // Actions
@@ -84,6 +92,7 @@ export function AppProvider({ children }) {
     handleDockClick,
     setShowPasscodeOverlay,
     toggleMusic,
+    registerMusicInteraction,
     setIsVideoPlaying,
     resetExperience,
     setActiveDock,

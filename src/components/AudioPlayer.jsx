@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 
 const NORMAL_VOLUME = 1;
@@ -7,21 +7,18 @@ const FADE_STEP = 0.05;
 const FADE_INTERVAL_MS = 30;
 
 const AudioPlayer = () => {
-  const { isMusicPlaying, hasAcceptedDate, isVideoPlaying } = useApp();
+  const { isMusicPlaying, hasMusicInteraction, isVideoPlaying } = useApp();
   const audioRef = useRef(null);
-  const [hasStarted, setHasStarted] = useState(false);
   const fadeRef = useRef(null);
 
   useEffect(() => {
-    // Only attempt to play after user has clicked "Yes" (user interaction)
-    if (hasAcceptedDate && isMusicPlaying && audioRef.current) {
+    // Only attempt to play after any landing-page interaction (browser autoplay policy).
+    if (hasMusicInteraction && isMusicPlaying && audioRef.current) {
       const playPromise = audioRef.current.play();
 
       if (playPromise !== undefined) {
         playPromise
-          .then(() => {
-            setHasStarted(true);
-          })
+          .then(() => {})
           .catch(error => {
             console.log("Audio play failed:", error);
           });
@@ -29,7 +26,7 @@ const AudioPlayer = () => {
     } else if (!isMusicPlaying && audioRef.current) {
       audioRef.current.pause();
     }
-  }, [isMusicPlaying, hasAcceptedDate]);
+  }, [isMusicPlaying, hasMusicInteraction]);
 
   // Smoothly fade volume when a video plays/pauses
   useEffect(() => {
@@ -58,14 +55,13 @@ const AudioPlayer = () => {
 
   // Reset when experience is reset
   useEffect(() => {
-    if (!hasAcceptedDate) {
-      setHasStarted(false);
+    if (!hasMusicInteraction) {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
     }
-  }, [hasAcceptedDate]);
+  }, [hasMusicInteraction]);
 
   return (
     <audio
