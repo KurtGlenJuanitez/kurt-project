@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/generate-memories-manifest.mjs",
     "build": "vite build",
+    "generate:memories-manifest": "node scripts/generate-memories-manifest.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

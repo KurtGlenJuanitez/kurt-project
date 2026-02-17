@@ -2,13 +2,13 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 
-// ─── Configuration ───────────────────────────────────────────────
+// Configuration
 // Unlock code for the Messages module (anniversary date: Feb 18, 2025)
 const MESSAGES_LOCK_CODE = '20250218';
 const MESSAGES_UNLOCK_STORAGE_KEY = 'messages-module-unlocked';
 
-// ─── Floating Heart Component ────────────────────────────────────
-// Soft, drifting hearts that surround the envelope — varied sizes,
+// Floating Heart Component
+// Soft, drifting hearts that surround the envelope - varied sizes,
 // speeds, and opacity to create an enchanting ambient effect.
 function FloatingHeart({ delay, x, size, duration }) {
   return (
@@ -38,7 +38,7 @@ function FloatingHeart({ delay, x, size, duration }) {
   );
 }
 
-// ─── Envelope SVG Component ──────────────────────────────────────
+// Envelope SVG Component
 // A stylized envelope that visually opens with CSS 3D transforms.
 // The flap rotates open, then the paper rises and unfolds.
 function EnvelopeSVG({ isOpen }) {
@@ -77,7 +77,7 @@ function EnvelopeSVG({ isOpen }) {
         </div>
       </div>
 
-      {/* Envelope flap — rotates open via 3D perspective */}
+      {/* Envelope flap - rotates open via 3D perspective */}
       <div
         className="absolute top-0 left-0 right-0 z-20"
         style={{
@@ -102,7 +102,7 @@ function EnvelopeSVG({ isOpen }) {
   );
 }
 
-// ─── Letter Paper Component ──────────────────────────────────────
+// Letter Paper Component
 // The unfolding paper that rises from the envelope and reveals text.
 function LetterPaper({ stage, onReadLetter }) {
   // stage: 0 = hidden, 1 = rising from envelope, 2 = unfolded, 3 = letter visible
@@ -173,8 +173,8 @@ function LetterPaper({ stage, onReadLetter }) {
   );
 }
 
-// ─── Full Letter View Component ──────────────────────────────────
-// The final reveal — the anniversary letter displayed in a beautiful,
+// Full Letter View Component
+// The final reveal - the anniversary letter displayed in a beautiful,
 // readable format. This is the emotional climax of the entire module.
 function LetterView({ onClose }) {
   const scrollRef = useRef(null);
@@ -262,11 +262,22 @@ function LetterView({ onClose }) {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.0, duration: 1.2 }}
             >
-              {/* eslint-disable-next-line no-irregular-whitespace */}
-              {/* &#9999;&#65039; REPLACE THIS WITH THE ANNIVERSARY LETTER CONTENT */}
-              <p>
-                Happy anniversary, my love! This year has been a beautiful journey of growth, laughter, and love. Every moment with you has been a gift I treasure more than words can say. You've made me a better person and shown me what it means to truly be loved. Here's to another year of adventures, memories, and the joy we share together.
-              </p>
+              <p className="whitespace-pre-wrap">{`To my dearest Lexa,
+
+It’s been a full year now, a year of us. Looking back at where we started, I remember those early days filled with uncertainty and the quiet doubts we both carried. But look at us now. Look at how far we’ve traveled and how beautifully our bond has grown. We built this trust brick by brick, and today, it’s the strongest thing I know.
+
+I want you to know that every second spent with you is a treasure. Nothing is ever wasted when it’s shared with you; in fact, being with you is the part of my day I’m always most excited for. When I’m by your side, the world feels different. It feels safe. The problems that used to feel like mountains suddenly feel like small hills I can easily climb.
+
+You’ve become the place where I can finally set down the weight I carry. You make me believe in the phrase, "With you, I can." Because of your support, I feel capable of achieving anything, or finding a new way forward when things get tough. You don't just witness my life; you make me better at living it.
+
+I feel like the most appreciated person in the world because of how you choose to love me, physically, mentally, and soulfully. Your touch is as soft as the clouds, and those long talks we have feel like a sanctuary where I am truly heard. Whether I’m ranting, breaking down, or just lost in the fog, you are always there to carry the weight with me. You are my clarity when things get blurried.
+
+How could a man like me not be completely devoted to a woman like you? Your affection, your effort, and the respect you show me are gifts I never take for granted. I am, and will forever be, deeply in love with you.
+
+I love you from the deepest parts of my heart and soul, Lexa.
+
+Happiest Anniversary, my love.
+`}</p>
               <p className="text-right mt-10 italic text-[#6b3a42]">
                 Forever and always yours,
                 <br />
@@ -290,11 +301,11 @@ function LetterView({ onClose }) {
   );
 }
 
-// ─── Main Messages Module Component ──────────────────────────────
+// Main Messages Module Component
 export default function MessagesContent() {
   const { showNotification } = useApp();
 
-  // ── Lock/Unlock State ──
+  // Lock/Unlock State
   const [isUnlocked, setIsUnlocked] = useState(() =>
     typeof window !== 'undefined' &&
     window.sessionStorage.getItem(MESSAGES_UNLOCK_STORAGE_KEY) === 'true'
@@ -303,14 +314,14 @@ export default function MessagesContent() {
   const [lockError, setLockError] = useState('');
   const [shakeKey, setShakeKey] = useState(0);
 
-  // ── Envelope Animation Stages ──
+  // Envelope Animation Stages
   // 'envelope' = envelope visible, 'opening' = flap opening,
   // 'paper-rising' = paper emerges, 'paper-unfolded' = paper open,
   // 'letter' = full letter displayed
   const [stage, setStage] = useState('envelope');
   const [showLetter, setShowLetter] = useState(false);
 
-  // ── Floating hearts configuration ──
+  // Floating hearts configuration
   const hearts = useMemo(
     () =>
       Array.from({ length: 20 }, (_, i) => ({
@@ -323,7 +334,7 @@ export default function MessagesContent() {
     []
   );
 
-  // ── Passcode submission handler ──
+  // Passcode submission handler
   const handleUnlockSubmit = useCallback(
     (event) => {
       event.preventDefault();
@@ -336,7 +347,7 @@ export default function MessagesContent() {
         return;
       }
 
-      // Correct code — unlock with a smooth transition
+      // Correct code - unlock with a smooth transition
       setIsUnlocked(true);
       setLockError('');
       setPasscodeInput('');
@@ -348,7 +359,7 @@ export default function MessagesContent() {
     [passcodeInput, showNotification]
   );
 
-  // ── Envelope click handler — triggers the multi-stage animation ──
+  // Envelope click handler - triggers the multi-stage animation
   const handleEnvelopeClick = useCallback(() => {
     if (stage !== 'envelope') return;
 
@@ -362,20 +373,20 @@ export default function MessagesContent() {
     setTimeout(() => setStage('paper-unfolded'), 2400);
   }, [stage]);
 
-  // ── Letter reveal handler ──
+  // Letter reveal handler
   const handleReadLetter = useCallback(() => {
     setShowLetter(true);
     setStage('letter');
   }, []);
 
-  // ── Close letter and reset to envelope ──
+  // Close letter and reset to envelope
   const handleCloseLetter = useCallback(() => {
     setShowLetter(false);
     // Reset to initial envelope state so user can replay
     setStage('envelope');
   }, []);
 
-  // ── Keyboard support: Enter to click envelope ──
+  // Keyboard support: Enter to click envelope
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key === 'Enter' && stage === 'envelope') {
@@ -401,7 +412,7 @@ export default function MessagesContent() {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
     >
-      {/* ── Title header ── */}
+      {/* Title header */}
       <motion.div
         className="text-center mb-8 relative z-10"
         initial={{ y: 30, opacity: 0 }}
@@ -420,8 +431,7 @@ export default function MessagesContent() {
             : 'This letter is sealed. Enter the code to unlock it.'}
         </p>
       </motion.div>
-
-      {/* ── Locked State: Passcode Input ── */}
+      {/* Locked State: Passcode Input */}
       <AnimatePresence mode="wait">
         {!isUnlocked && (
           <motion.section
@@ -506,8 +516,7 @@ export default function MessagesContent() {
           </motion.section>
         )}
       </AnimatePresence>
-
-      {/* ── Unlocked State: Envelope Experience ── */}
+      {/* Unlocked State: Envelope Experience */}
       <AnimatePresence mode="wait">
         {isUnlocked && (
           <motion.section
@@ -517,7 +526,7 @@ export default function MessagesContent() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
           >
-            {/* Floating hearts layer — behind the envelope */}
+            {/* Floating hearts layer - behind the envelope */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               {hearts.map((heart) => (
                 <FloatingHeart key={heart.id} {...heart} />
@@ -569,7 +578,7 @@ export default function MessagesContent() {
                 )}
               </AnimatePresence>
 
-              {/* Replay button — visible after paper unfolds */}
+              {/* Replay button - visible after paper unfolds */}
               <AnimatePresence>
                 {(stage === 'paper-unfolded' || stage === 'letter') && !showLetter && (
                   <motion.button
@@ -589,11 +598,12 @@ export default function MessagesContent() {
           </motion.section>
         )}
       </AnimatePresence>
-
-      {/* ── Full Letter Overlay ── */}
+      {/* Full Letter Overlay */}
       <AnimatePresence>
         {showLetter && <LetterView onClose={handleCloseLetter} />}
       </AnimatePresence>
     </motion.div>
   );
 }
+
+

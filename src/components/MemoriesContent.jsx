@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import { MONTH_MEDIA_MANIFEST } from '../data/memoriesManifest';
 import FlowingMenu from './FlowingMenu';
 import CardSwap, { Card } from './CardSwap/CardSwap';
 
@@ -10,15 +11,6 @@ const MEMORIES_UNLOCK_STORAGE_KEY = 'memories-module-unlocked';
 // Change this value to update the Memories lock passcode.
 const MEMORIES_LOCK_CODE = '101224';
 const MONTH_MEDIA_ROOT = 'memories/months';
-const IMAGE_EXTENSIONS = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG', 'webp', 'WEBP'];
-const VIDEO_EXTENSIONS = [
-  'mp4', 'MP4', 'webm', 'WEBM', 'mov', 'MOV',
-  // Handles files like "vid-3.MP4.mp4" that exist in the media folders.
-  'mp4.mp4', 'MP4.mp4', 'mov.mp4', 'MOV.mp4',
-];
-const IMAGE_SLOTS = Array.from({ length: 24 }, (_, idx) => idx + 1);
-const VIDEO_SLOTS = Array.from({ length: 12 }, (_, idx) => idx + 1);
-const assetCache = new Map();
 const MONTH_FMT = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 
 // Personal notes for each month — add or edit messages here.
@@ -69,6 +61,10 @@ function resolveInitialState(validMonthIds) {
   return { monthId: DEFAULT_MONTH_ID, viewMode: 'menu' };
 }
 
+function getMonthMedia(monthId) {
+  return MONTH_MEDIA_MANIFEST[monthId] ?? { images: [], videos: [] };
+}
+
 function buildMonthItems() {
   const basePath = import.meta.env.BASE_URL;
   const items = [];
@@ -80,48 +76,22 @@ function buildMonthItems() {
     const month = String(cursor.getUTCMonth() + 1).padStart(2, '0');
     const monthId = `${year}-${month}`;
     const dateLabel = MONTH_FMT.format(cursor);
+    const monthMedia = getMonthMedia(monthId);
+    const previewImageName = monthMedia.images[0];
 
     items.push({
       monthId,
       tabId: `memories-${monthId}`,
       text: dateLabel,
       link: `#memories-${monthId}`,
-      // Placeholder — resolved asynchronously by useResolvedMonthImages
-      image: `${basePath}${MONTH_MEDIA_ROOT}/${monthId}/image-1.jpg`,
+      image: previewImageName
+        ? `${basePath}${MONTH_MEDIA_ROOT}/${monthId}/${previewImageName}`
+        : `${basePath}${MONTH_MEDIA_ROOT}/${monthId}/image-1.jpg`,
       dateLabel,
     });
   }
 
   return items;
-}
-
-// Resolve the correct image extension for each month's preview thumbnail.
-// Files may be .jpg, .JPG, .jpeg, .png, .PNG, .webp etc., so we probe
-// for the first match using the same findFirstAsset helper.
-function useResolvedMonthImages(monthItems) {
-  const [resolved, setResolved] = useState(monthItems);
-
-  useEffect(() => {
-    let cancelled = false;
-    const basePath = import.meta.env.BASE_URL;
-
-    async function resolve() {
-      const updated = await Promise.all(
-        monthItems.map(async (item) => {
-          const baseUrl = `${basePath}${MONTH_MEDIA_ROOT}/${item.monthId}/image-1`;
-          const found = await findFirstAsset(baseUrl, IMAGE_EXTENSIONS);
-          if (cancelled) return item;
-          return found ? { ...item, image: found } : item;
-        })
-      );
-      if (!cancelled) setResolved(updated);
-    }
-
-    resolve();
-    return () => { cancelled = true; };
-  }, [monthItems]);
-
-  return resolved;
 }
 
 function getFlowMenuScrollbarConfig() {
@@ -135,43 +105,29 @@ function getFlowMenuScrollbarConfig() {
   };
 }
 
-const VALID_MEDIA_TYPES = new Set([
-  'image/jpeg', 'image/png', 'image/webp',
-  'video/mp4', 'video/webm', 'video/quicktime',
-]);
-
-async function assetExists(url) {
-  try {
-    const response = await fetch(url, { method: 'HEAD', cache: 'no-store' });
-    if (!response.ok) {
-      if (response.status === 405) {
-        const fallback = await fetch(url, { method: 'GET', cache: 'no-store' });
-        if (!fallback.ok) return false;
-        const ct = (fallback.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-        return VALID_MEDIA_TYPES.has(ct);
-      }
-      return false;
-    }
-    const ct = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-    return VALID_MEDIA_TYPES.has(ct);
-  } catch {
-    return false;
-  }
+function stripFinalExtension(fileName) {
+  return fileName.replace(/\.[^/.]+$/, '');
 }
 
-async function findFirstAsset(baseUrl, extensions) {
-  if (assetCache.has(baseUrl)) return assetCache.get(baseUrl);
+function buildMonthCards(monthId, basePath) {
+  const monthRoot = `${basePath}${MONTH_MEDIA_ROOT}/${monthId}`;
+  const monthMedia = getMonthMedia(monthId);
 
-  for (const ext of extensions) {
-    const candidate = `${baseUrl}.${ext}`;
-    const exists = await assetExists(candidate);
-    if (exists) {
-      assetCache.set(baseUrl, candidate);
-      return candidate;
-    }
-  }
-  assetCache.set(baseUrl, null);
-  return null;
+  const imageCards = monthMedia.images.map((fileName, index) => ({
+    id: `${monthId}-image-${index}-${fileName}`,
+    type: 'image',
+    src: `${monthRoot}/${fileName}`,
+    label: stripFinalExtension(fileName),
+  }));
+
+  const videoCards = monthMedia.videos.map((fileName, index) => ({
+    id: `${monthId}-video-${index}-${fileName}`,
+    type: 'video',
+    src: `${monthRoot}/${fileName}`,
+    label: stripFinalExtension(fileName),
+  }));
+
+  return [...imageCards, ...videoCards];
 }
 
 function MemoryCardMedia({ card }) {
@@ -199,7 +155,7 @@ function MemoryCardMedia({ card }) {
         controls
         autoPlay={false}
         playsInline
-        preload="metadata"
+        preload="none"
         onPlay={() => setIsVideoPlaying(true)}
         onPause={() => setIsVideoPlaying(false)}
         onEnded={() => setIsVideoPlaying(false)}
@@ -214,6 +170,7 @@ function MemoryCardMedia({ card }) {
       alt={card.label}
       className="w-full h-full object-cover"
       loading="lazy"
+      decoding="async"
       onError={() => setHasError(true)}
     />
   );
@@ -221,7 +178,6 @@ function MemoryCardMedia({ card }) {
 
 export default function MemoriesContent() {
   const monthItems = useMemo(() => buildMonthItems(), []);
-  const resolvedMonthItems = useResolvedMonthImages(monthItems);
   const validMonthIds = useMemo(() => new Set(monthItems.map((item) => item.monthId)), [monthItems]);
   const initialState = useMemo(() => resolveInitialState(validMonthIds), [validMonthIds]);
   const [isUnlocked, setIsUnlocked] = useState(() => (
@@ -275,53 +231,9 @@ export default function MemoriesContent() {
   useEffect(() => {
     if (viewMode !== 'detail' || !isValidMonthId(activeMonthId)) return;
 
-    let isCancelled = false;
-
-    const loadMonthCards = async () => {
-      setIsLoadingCards(true);
-      setMonthCards([]);
-
-      const monthRoot = `${basePath}${MONTH_MEDIA_ROOT}/${activeMonthId}`;
-
-      // Scan sequentially and stop after 2 consecutive misses (handles gaps)
-      const scanSlots = async (slots, prefix, type, extensions) => {
-        const results = [];
-        let misses = 0;
-        for (const index of slots) {
-          if (isCancelled) break;
-          const src = await findFirstAsset(`${monthRoot}/${prefix}-${index}`, extensions);
-          if (src) {
-            misses = 0;
-            results.push({
-              id: `${activeMonthId}-${prefix}-${index}`,
-              type,
-              src,
-              label: `${prefix}-${index}`,
-            });
-          } else {
-            misses += 1;
-            if (misses >= 2) break;
-          }
-        }
-        return results;
-      };
-
-      const [images, videos] = await Promise.all([
-        scanSlots(IMAGE_SLOTS, 'image', 'image', IMAGE_EXTENSIONS),
-        scanSlots(VIDEO_SLOTS, 'vid', 'video', VIDEO_EXTENSIONS),
-      ]);
-
-      if (!isCancelled) {
-        setMonthCards([...images, ...videos]);
-        setIsLoadingCards(false);
-      }
-    };
-
-    loadMonthCards();
-
-    return () => {
-      isCancelled = true;
-    };
+    setIsLoadingCards(true);
+    setMonthCards(buildMonthCards(activeMonthId, basePath));
+    setIsLoadingCards(false);
   }, [activeMonthId, viewMode, basePath]);
 
   const activeItem = monthItems.find((item) => item.monthId === activeMonthId) ?? monthItems[monthItems.length - 1];
@@ -489,7 +401,7 @@ export default function MemoriesContent() {
         {isUnlocked && viewMode === 'menu' && (
           <section className="glass-strong rounded-2xl border border-rose-gold/20 overflow-hidden h-[82vh] min-h-[560px] max-h-[920px]">
             <FlowingMenu
-              items={resolvedMonthItems}
+              items={monthItems}
               activeId={activeMonthId}
               onItemSelect={handleSelectMonth}
               scrollbar={flowMenuScrollbar}
