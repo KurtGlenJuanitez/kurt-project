@@ -18,6 +18,10 @@ function formatMB(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
+function sameFilePath(a, b) {
+  return path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
+}
+
 async function walkFiles(dir) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   const files = [];
@@ -101,6 +105,7 @@ async function optimizeVideo(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   const targetPath = path.join(dir, `${baseName}.mp4`);
   const tempPath = path.join(dir, `${baseName}.opt.mp4`);
+  const isSameTargetAsSource = sameFilePath(filePath, targetPath);
 
   await fs.rm(tempPath, { force: true });
 
@@ -141,12 +146,9 @@ async function optimizeVideo(filePath) {
   }
 
   await fs.rm(targetPath, { force: true });
-  if (targetPath === filePath) {
-    await fs.rm(filePath, { force: true });
-  }
   await fs.rename(tempPath, targetPath);
 
-  if (targetPath !== filePath) {
+  if (!isSameTargetAsSource) {
     await fs.rm(filePath, { force: true });
   }
 

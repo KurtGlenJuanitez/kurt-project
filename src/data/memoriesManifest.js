@@ -116,7 +116,11 @@ export const MONTH_MEDIA_MANIFEST = {
     "videos": [
       "vid-1.mp4",
       "vid-2.MP4",
+      "vid-3.mp4",
+      "vid-4.mp4",
       "vid-5.MP4",
+      "vid-6.mp4",
+      "vid-7.mp4",
       "vid-8.MP4",
       "vid-9.MP4",
       "vid-10.MP4",
@@ -157,6 +161,7 @@ export const MONTH_MEDIA_MANIFEST = {
       "vid-1.MP4",
       "vid-2.MP4",
       "vid-3.MP4",
+      "vid-4.mp4",
       "vid-5.mp4"
     ]
   },
@@ -245,6 +250,7 @@ export const MONTH_MEDIA_MANIFEST = {
     ],
     "videos": [
       "vid-1.mp4",
+      "vid-2.mp4",
       "vid-3.mp4",
       "vid-4.mp4",
       "vid-6.mp4",
